@@ -1,0 +1,40 @@
+<div class="shell">
+  <aside class="sidebar" [class.ouvert]="menuOuvert()">
+    <a routerLink="/" class="logo" (click)="menuOuvert.set(false)">
+      <img src="favicon.svg" alt="" width="30" height="30" />
+      <span>Postulo</span>
+    </a>
+
+    <nav>
+      @for (l of liens; track l.url) {
+        <a [routerLink]="l.url" routerLinkActive="actif" [routerLinkActiveOptions]="{ exact: l.url === '/' }" (click)="menuOuvert.set(false)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="l.icone" /></svg>
+          {{ l.label }}
+          @if (l.url === '/candidatures' && store.aRelancer().length) {
+            <span class="pastille" title="Candidatures à relancer">{{ store.aRelancer().length }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <p class="sidebar-pied">
+      Vos données restent dans ce navigateur.<br />
+      Pensez à exporter de temps en temps.
+    </p>
+  </aside>
+
+  <div class="contenu">
+    <header class="barre-mobile">
+      <button class="btn-icone" (click)="menuOuvert.set(!menuOuvert())" aria-label="Ouvrir le menu">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+      </button>
+      <strong>Postulo</strong>
+    </header>
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+  @if (menuOuvert()) {
+    <div class="voile" (click)="menuOuvert.set(false)"></div>
+  }
+</div>
