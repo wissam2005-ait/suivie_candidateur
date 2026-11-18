@@ -5,6 +5,23 @@ import { exemplesCandidatures, exempleProfil } from './exemples';
 
 const CLE_CANDIDATURES = 'postulo.candidatures.v1';
 const CLE_PROFIL = 'postulo.profil.v1';
+const CLE_SIMULATIONS = 'postulo.simulations.v1';
+const CLE_PITCHS = 'postulo.pitchs.v1';
+
+export interface ResultatSimulation {
+  date: string;
+  poste: string;
+  entreprise: string;
+  note: number;
+}
+
+export interface PitchSauve {
+  format: string;
+  poste: string;
+  entreprise: string;
+  blocs: { titre: string; texte: string }[];
+  majLe: string;
+}
 
 // Délai (en jours) au bout duquel on conseille de relancer une candidature sans réponse
 export const DELAI_RELANCE = 7;
@@ -38,6 +55,8 @@ export function nouvelId(): string {
 export class Store {
   readonly candidatures = signal<Candidature[]>(lire(CLE_CANDIDATURES, []));
   readonly profil = signal<Profil>({ ...profilVide(), ...lire<Partial<Profil>>(CLE_PROFIL, {}) });
+  readonly simulations = signal<ResultatSimulation[]>(lire(CLE_SIMULATIONS, []));
+  readonly pitchs = signal<Record<string, PitchSauve>>(lire(CLE_PITCHS, {}));
 
   readonly aRelancer = computed(() => {
     const auj = aujourdhui();
@@ -61,6 +80,8 @@ export class Store {
   constructor() {
     effect(() => ecrire(CLE_CANDIDATURES, this.candidatures()));
     effect(() => ecrire(CLE_PROFIL, this.profil()));
+    effect(() => ecrire(CLE_SIMULATIONS, this.simulations()));
+    effect(() => ecrire(CLE_PITCHS, this.pitchs()));
   }
 
   trouver(id: string) {
@@ -80,6 +101,14 @@ export class Store {
     const modif: Candidature = { ...c, statut };
     if (statut === 'relancee' && !c.dateRelance) modif.dateRelance = aujourdhui();
     this.enregistrer(modif);
+  }
+
+  ajouterSimulation(r: ResultatSimulation) {
+    this.simulations.update((l) => [r, ...l].slice(0, 30));
+  }
+
+  sauverPitch(p: PitchSauve) {
+    this.pitchs.update((m) => ({ ...m, [p.format]: p }));
   }
 
   supprimer(id: string) {

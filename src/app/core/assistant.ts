@@ -3,13 +3,25 @@ import { Profil } from './models';
 import { Store } from './store';
 import * as horsLigne from './hors-ligne';
 
-export type Tour = { role: 'recruteur' | 'candidat'; texte: string };
+export type Tour = { role: 'recruteur' | 'candidat'; texte: string; relance?: boolean };
+
+export interface AnalyseReponse {
+  note: number;
+  forts: string[];
+  ameliorer: string[];
+  attendu?: string;
+  conseil?: string;
+}
 
 export interface EtapeEntretien {
   retour: string | null;
+  analyse: AnalyseReponse | null;
   question: string | null;
+  indice: string | null;
+  relance: boolean;
   bilan: string | null;
   note: number | null;
+  criteres: { nom: string; note: number }[] | null;
 }
 
 export interface Cible {
@@ -17,6 +29,9 @@ export interface Cible {
   entreprise: string;
   notes?: string;
 }
+
+export type FormatPitch = horsLigne.FormatPitch;
+export type Pitch = horsLigne.Pitch;
 
 /** Résumé texte du profil envoyé à l'IA (on n'envoie ni téléphone ni e-mail). */
 export function resumeProfil(p: Profil): string {
@@ -39,6 +54,7 @@ export function resumeProfil(p: Profil): string {
 @Injectable({ providedIn: 'root' })
 export class Assistant {
   private store = inject(Store);
+  private session: horsLigne.SessionHorsLigne | null = null;
 
   /** Passe à true dès que l'API répond 503 (pas de clé) ou n'est pas joignable. */
   readonly modeHorsLigne = signal(false);
@@ -70,8 +86,11 @@ export class Assistant {
   }
 
   async etapeEntretien(cible: Cible, historique: Tour[]): Promise<EtapeEntretien> {
+    if (!historique.length) this.session = null;
     const r = await this.appeler<EtapeEntretien>({ type: 'entretien', ...cible, historique });
-    return r ?? horsLigne.etapeEntretien(cible, historique);
+    if (r) return r;
+    this.session ??= horsLigne.nouvelleSession(cible);
+    return horsLigne.etapeEntretien(cible, historique, this.session);
   }
 
   async lettre(cible: Cible, ton: string): Promise<string> {
@@ -82,5 +101,10 @@ export class Assistant {
   async accroche(cible: Cible): Promise<string> {
     const r = await this.appeler<{ texte: string }>({ type: 'accroche', ...cible });
     return r?.texte ?? horsLigne.accroche(this.store.profil(), cible);
+  }
+
+  async pitch(cible: Cible, format: FormatPitch): Promise<Pitch> {
+    const r = await this.appeler<Pitch>({ type: 'pitch', ...cible, format });
+    return r ?? horsLigne.pitch(this.store.profil(), cible, format);
   }
 }
