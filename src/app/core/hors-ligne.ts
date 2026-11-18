@@ -310,24 +310,36 @@ const minuscule = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 const competencesDe = (p: Profil, n = 3) => p.competences.split(',').map((s) => s.trim()).filter(Boolean).slice(0, n);
 
 export function lettre(p: Profil, c: Cible): string {
-  const nom = [p.prenom, p.nom].filter(Boolean).join(' ') || '[Prénom Nom]';
   const exp = p.experiences[0];
   const projet = p.projets[0];
-  const competences = competencesDe(p).join(', ');
+  const comp = competencesDe(p);
+  const entreprise = c.entreprise || 'votre entreprise';
+  const situation = p.titre ? minuscule(p.titre) : 'étudiant(e)';
+  const fin = (t: string) => minuscule(t.trim().replace(/[.\s]+$/, ''));
 
-  return `Objet : candidature au poste de ${c.poste}
+  const vous = c.notes?.trim()
+    ? `Ce qui m'attire chez ${entreprise}, c'est ${fin(c.notes)}. Votre offre de ${c.poste} m'a donc tout de suite parlé.`
+    : `Votre offre de ${c.poste} chez ${entreprise} a retenu toute mon attention : [ce qui t'attire précisément chez eux, un produit, un projet ou une valeur].`;
+
+  const preuves: string[] = [];
+  if (exp) preuves.push(`Lors de mon ${minuscule(exp.titre)} chez ${exp.lieu.split(',')[0]}, mes missions étaient les suivantes : ${fin(exp.description)}.`);
+  if (projet) preuves.push(`J'ai également mené le projet ${projet.titre} : ${fin(projet.description)}.`);
+  if (!preuves.length) preuves.push(`[Décris une expérience ou un projet concret, et ce qu'il a apporté.]`);
+  const moi = `Actuellement ${situation}, j'ai déjà pu mettre mes compétences en pratique. ${preuves.join(' ')}${comp.length ? ` Ces expériences m'ont permis de consolider ${comp.slice(0, -1).join(', ')}${comp.length > 1 ? ' et ' : ''}${comp.at(-1)}.` : ''}`;
+
+  const nous = `Rejoindre votre équipe serait pour moi l'occasion d'apprendre aux côtés de professionnels expérimentés, tout en apportant rapidement ma rigueur et ma curiosité. Je serais heureux(se) de vous présenter ma motivation lors d'un entretien.`;
+
+  return `Objet : candidature au poste de ${c.poste}${c.entreprise ? ` chez ${c.entreprise}` : ''}
 
 Madame, Monsieur,
 
-${c.entreprise} est une entreprise que je suis depuis un moment, et l'offre de ${c.poste} correspond exactement à ce que je recherche${p.titre ? ` dans le cadre de mon parcours (${p.titre.toLowerCase()})` : ''}.
+${vous}
 
-${exp ? `Lors de mon expérience « ${exp.titre} » chez ${exp.lieu}, ${minuscule(exp.description)} ` : ''}${projet ? `J'ai aussi mené le projet ${projet.titre} : ${minuscule(projet.description)} ` : ''}${competences ? `Ces expériences m'ont permis de pratiquer ${competences}.` : ''}
+${moi}
 
-Ce qui me motive chez vous, c'est la possibilité d'apprendre au contact d'une équipe expérimentée tout en étant utile rapidement. Je serais ravi(e) d'échanger avec vous pour vous montrer ce que je peux apporter.
+${nous}
 
-Je vous prie d'agréer, Madame, Monsieur, mes salutations distinguées.
-
-${nom}`;
+Je vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.`;
 }
 
 export function accroche(p: Profil, c: Cible): string {

@@ -53,6 +53,8 @@ export function exempleProfil(): Profil {
     apropos: 'Passionnée par le développement web, je cherche une alternance pour progresser sur des projets concrets au sein d\'une équipe produit.',
     competences: 'Angular, TypeScript, Java, SQL, Git, HTML/CSS, Figma',
     langues: 'Français (natif), Anglais (B2)',
+    interets: 'Photographie, bénévolat aux Restos du Cœur, course à pied',
+    photo: '',
     formations: [
       { titre: 'BTS SIO option SLAM', lieu: 'Lycée Jean Jaurès, Paris', periode: '2025 – 2027', description: 'Développement d\'applications, bases de données, gestion de projet.' },
       { titre: 'Baccalauréat STI2D', lieu: 'Paris', periode: '2025', description: 'Mention bien.' },

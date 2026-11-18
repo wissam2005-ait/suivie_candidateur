@@ -207,7 +207,7 @@ const VIDES = new Set(['aujourd', 'parce', 'depuis', 'pendant', 'comme', 'aussi'
     @media (max-width: 800px) { .formats { grid-template-columns: 1fr 1fr; } }
     .format { text-align: left; border: 1px solid var(--bord); background: var(--surface); border-radius: 12px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; transition: border-color 0.15s, box-shadow 0.15s; }
     .format span { font-size: 12.5px; color: var(--encre-3); }
-    .format:hover { border-color: #cfc8bb; }
+    .format:hover { border-color: var(--bord-fort); }
     .format.actif { border-color: var(--vert); box-shadow: 0 0 0 1px var(--vert); background: var(--vert-clair); }
     .quand { margin: 10px 0 18px; }
 
@@ -248,8 +248,8 @@ const VIDES = new Set(['aujourd', 'parce', 'depuis', 'pendant', 'comme', 'aussi'
 
     .resultats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
     @media (max-width: 800px) { .resultats { grid-template-columns: 1fr 1fr; } }
-    .res { border: 1px solid #f1d7a6; background: #fdf6e3; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; }
-    .res.ok { border-color: #bfe0cb; background: #ecf7f0; }
+    .res { border: 1px solid var(--avert-bord); background: var(--avert-fond); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; }
+    .res.ok { border-color: var(--ok-bord); background: var(--ok-fond); }
     .res b { font-family: var(--titre); font-size: 24px; }
     .res span { font-size: 12.5px; color: var(--encre-2); }
     .conseils { margin: 14px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }

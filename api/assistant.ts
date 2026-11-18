@@ -164,7 +164,7 @@ function construire(r: Requete) {
       system:
         `Tu aides un étudiant à rédiger une lettre de motivation en français. La lettre doit sonner humaine et sincère : pas de formules creuses (« dynamique et motivé », « je me permets de »), des phrases simples, des exemples tirés du profil. ` +
         `Structure : vous (l'entreprise) / moi (parcours, compétences prouvées par des exemples) / nous (ce que je peux apporter, disponibilité). 250 à 330 mots. ` +
-        `N'invente aucune expérience, aucun chiffre ni aucun diplôme absent du profil. Réponds uniquement avec la lettre (objet, formule d'appel, corps, formule de politesse, signature), sans commentaire.`,
+        `N'invente aucune expérience, aucun chiffre ni aucun diplôme absent du profil. Réponds uniquement avec la lettre, sans commentaire : première ligne « Objet : … », puis la formule d'appel, le corps et la formule de politesse. Pas d'adresse, de date ni de signature : elles sont ajoutées par la mise en page.`,
       user: `${contexte}\n\nTon souhaité : ${r.ton || 'professionnel et chaleureux'}.`,
       schema: null,
       effort: 'medium' as const,

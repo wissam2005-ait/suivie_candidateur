@@ -256,8 +256,8 @@ function vierge(): Candidature {
     select.filtre { width: auto; }
 
     .kanban { display: grid; grid-template-columns: repeat(6, minmax(190px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
-    .colonne { background: #efebe3; border-radius: var(--rayon); padding: 10px; min-height: 300px; transition: background 0.15s; }
-    .colonne.survol { background: color-mix(in srgb, var(--c) 14%, #efebe3); }
+    .colonne { background: var(--fond-3); border-radius: var(--rayon); padding: 10px; min-height: 300px; transition: background 0.15s; }
+    .colonne.survol { background: color-mix(in srgb, var(--c) 14%, var(--fond-3)); }
     .colonne-titre { display: flex; justify-content: space-between; align-items: center; margin: 2px 2px 10px; }
     .fiche { background: var(--surface); border: 1px solid var(--bord); border-left: 3px solid var(--c); border-radius: 9px; padding: 10px 11px; margin-bottom: 8px; cursor: grab; font-size: 14px; }
     .fiche:hover { box-shadow: var(--ombre); }

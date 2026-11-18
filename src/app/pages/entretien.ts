@@ -240,15 +240,15 @@ interface Message {
     .options { display: flex; flex-direction: column; gap: 10px; }
     .interrupteur { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
     .interrupteur input { display: none; }
-    .interrupteur span { width: 34px; height: 20px; background: #d9d3c8; border-radius: 99px; position: relative; transition: background 0.15s; flex-shrink: 0; }
+    .interrupteur span { width: 34px; height: 20px; background: var(--interrupteur); border-radius: 99px; position: relative; transition: background 0.15s; flex-shrink: 0; }
     .interrupteur span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.15s; }
     .interrupteur input:checked + span { background: var(--accent); }
     .interrupteur input:checked + span::after { transform: translateX(14px); }
     .etapes { margin: 0 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--encre-2); }
-    .histo-ligne { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f0ece5; }
-    .mini-note { font-weight: 600; font-size: 13px; padding: 2px 8px; border-radius: 99px; background: #fbe4df; color: #9b3a2a; }
-    .mini-note.moyen { background: #fbefd5; color: #8a5d0c; }
-    .mini-note.bon { background: #dcf0e3; color: #1f6b3e; }
+    .histo-ligne { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--ligne); }
+    .mini-note { font-weight: 600; font-size: 13px; padding: 2px 8px; border-radius: 99px; background: var(--ko-fond); color: var(--ko-texte); }
+    .mini-note.moyen { background: var(--moyen-fond); color: var(--moyen-texte); }
+    .mini-note.bon { background: var(--ok-fond); color: var(--ok-texte); }
 
     .chat { padding: 0; display: flex; flex-direction: column; height: calc(100vh - 200px); min-height: 520px; overflow: hidden; }
     .chat-entete { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--bord); position: relative; }
@@ -261,8 +261,8 @@ interface Message {
     .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: var(--surface-2); }
     .bulle { max-width: 78%; padding: 11px 15px; border-radius: 14px; white-space: pre-wrap; position: relative; }
     .recruteur { background: var(--surface); border: 1px solid var(--bord); border-bottom-left-radius: 4px; align-self: flex-start; }
-    .recruteur.relance { border-color: #e4cf8f; }
-    .etiquette { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #a5781a; margin-bottom: 2px; }
+    .recruteur.relance { border-color: var(--avert-bord); }
+    .etiquette { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--moyen-texte); margin-bottom: 2px; }
     .candidat { background: var(--vert); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
     .duree { display: block; font-size: 11.5px; color: #9fb8af; margin-top: 4px; text-align: right; }
 
@@ -296,7 +296,7 @@ interface Message {
     .ecrit span:nth-child(3) { animation-delay: 0.3s; }
     @keyframes saut { 50% { transform: translateY(-4px); opacity: 0.5; } }
 
-    .indice { display: flex; gap: 8px; align-items: flex-start; padding: 10px 16px; background: #fdf6e3; border-top: 1px solid #f1e2b8; font-size: 13.5px; color: #6b5414; }
+    .indice { display: flex; gap: 8px; align-items: flex-start; padding: 10px 16px; background: var(--avert-fond); border-top: 1px solid var(--avert-bord); font-size: 13.5px; color: var(--avert-texte); }
     .saisie { display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--bord); align-items: flex-end; }
     .zone { flex: 1; position: relative; }
     .zone textarea { width: 100%; border: 1px solid var(--bord); border-radius: 10px; padding: 10px 12px 22px; resize: none; outline: none; }
@@ -307,7 +307,7 @@ interface Message {
     .micro.actif { background: var(--s-refus); border-color: var(--s-refus); color: #fff; animation: pulse-micro 1.2s infinite; }
     @keyframes pulse-micro { 50% { box-shadow: 0 0 0 5px rgb(194 82 63 / 0.2); } }
     .saisie.fin { justify-content: center; }
-    code { background: rgb(0 0 0 / 0.06); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+    code { background: var(--fond-3); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
     @media (max-width: 600px) { .bulle { max-width: 92%; } }
   `,
 })

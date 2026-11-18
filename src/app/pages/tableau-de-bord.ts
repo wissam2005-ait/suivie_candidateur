@@ -1,8 +1,12 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Store } from '../core/store';
 import { STATUTS } from '../core/models';
 import { aujourdhui, ajouterJours, ecartJours, formatCourt, toIso } from '../core/dates';
+
+function lireMasque(): boolean {
+  try { return localStorage.getItem('postulo.plan-masque') === '1'; } catch { return false; }
+}
 
 @Component({
   selector: 'app-tableau-de-bord',
@@ -20,6 +24,33 @@ import { aujourdhui, ajouterJours, ecartJours, formatCourt, toIso } from '../cor
         </a>
       </div>
     </div>
+
+    @if (!planMasque() && plan().faites < plan().etapes.length) {
+      <section class="carte plan">
+        <div class="plan-tete">
+          <div>
+            <h2>Ton plan de route</h2>
+            <p class="aide">{{ plan().faites }} étape{{ plan().faites > 1 ? 's' : '' }} sur {{ plan().etapes.length }} · une à la fois, pas de stress.</p>
+          </div>
+          <button class="btn-icone" (click)="masquerPlan()" aria-label="Masquer le plan de route" title="Masquer">
+            <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <div class="plan-barre"><div [style.width.%]="(plan().faites / plan().etapes.length) * 100"></div></div>
+        <ol class="plan-etapes">
+          @for (e of plan().etapes; track e.titre; let i = $index) {
+            <li [class.faite]="e.faite" [class.suivante]="i === plan().suivante">
+              <span class="pastille-etape">{{ e.faite ? '✓' : i + 1 }}</span>
+              <div>
+                <strong>{{ e.titre }}</strong>
+                <span class="aide">{{ e.aide }}</span>
+              </div>
+              @if (i === plan().suivante) { <a class="btn btn-petit btn-principal" [routerLink]="e.lien" [queryParams]="e.params">{{ e.action }}</a> }
+            </li>
+          }
+        </ol>
+      </section>
+    }
 
     @if (!store.candidatures().length) {
       <div class="carte vide">
@@ -126,6 +157,22 @@ import { aujourdhui, ajouterJours, ecartJours, formatCourt, toIso } from '../cor
     }
   `,
   styles: `
+    .plan { margin-bottom: 18px; }
+    .plan-tete { display: flex; justify-content: space-between; align-items: flex-start; }
+    .plan-tete .aide { margin: 4px 0 0; }
+    .plan-barre { height: 6px; background: var(--fond-3); border-radius: 99px; margin: 14px 0 6px; overflow: hidden; }
+    .plan-barre div { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s; }
+    .plan-etapes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    @media (max-width: 1100px) { .plan-etapes { grid-template-columns: 1fr; } }
+    .plan-etapes li { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; border: 1px solid var(--bord); background: var(--surface-2); }
+    @media (max-width: 1100px) { .plan-etapes li { flex-direction: row; align-items: center; } .plan-etapes li > div { flex: 1; } }
+    .plan-etapes li > div { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+    .plan-etapes li.faite { opacity: 0.6; }
+    .plan-etapes li.suivante { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+    .plan-etapes .btn { align-self: flex-start; }
+    .pastille-etape { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600; background: var(--fond-3); color: var(--encre-2); flex-shrink: 0; }
+    .faite .pastille-etape { background: var(--s-offre); color: #fff; }
+    .suivante .pastille-etape { background: var(--vert); color: var(--or); }
     .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 18px; }
     @media (max-width: 900px) { .kpis { grid-template-columns: 1fr 1fr; } }
     .kpi { display: flex; flex-direction: column; gap: 4px; }
@@ -152,16 +199,36 @@ import { aujourdhui, ajouterJours, ecartJours, formatCourt, toIso } from '../cor
     .rep-barre { height: 100%; background: var(--c); border-radius: 99px; transition: width 0.4s; }
     .rep-nb { text-align: right; font-weight: 600; }
 
-    .ligne-liste { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f0ece5; }
+    .ligne-liste { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--ligne); }
     .ligne-liste:last-child { border-bottom: none; }
     .date-bloc { width: 46px; text-align: center; background: var(--vert-clair); border-radius: 8px; padding: 5px 0; line-height: 1.1; }
-    .date-bloc span { display: block; font-family: var(--titre); font-size: 19px; font-weight: 600; color: var(--vert); }
+    .date-bloc span { display: block; font-family: var(--titre); font-size: 19px; font-weight: 600; color: var(--accent); }
     .date-bloc small { font-size: 11px; color: var(--accent); text-transform: uppercase; }
   `,
 })
 export class TableauDeBord {
   protected store = inject(Store);
   protected dateDuJour = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  protected planMasque = signal(lireMasque());
+
+  protected plan = computed(() => {
+    const p = this.store.profil();
+    const etapes = [
+      { titre: 'Compléter mon profil', aide: 'Formation, expériences, compétences.', faite: !!(p.prenom && p.competences && (p.experiences.length || p.projets.length)), lien: '/profil', params: {}, action: 'Remplir' },
+      { titre: 'Ajouter mes candidatures', aide: 'Ou importer mon fichier Excel.', faite: this.store.candidatures().length > 0, lien: '/candidatures', params: { nouvelle: 1 }, action: 'Ajouter' },
+      { titre: 'Préparer mon CV', aide: 'Un modèle propre, adapté à l\'offre.', faite: !!p.apropos && p.competences.split(',').length >= 5, lien: '/documents', params: {}, action: 'Ouvrir' },
+      { titre: 'Écrire mon pitch', aide: 'Me présenter en 1 minute.', faite: Object.keys(this.store.pitchs()).length > 0, lien: '/pitch', params: {}, action: 'Préparer' },
+      { titre: 'M\'entraîner à l\'entretien', aide: 'Une simulation complète.', faite: this.store.simulations().length > 0, lien: '/entretien', params: {}, action: 'Commencer' },
+    ];
+    const faites = etapes.filter((e) => e.faite).length;
+    return { etapes, faites, suivante: etapes.findIndex((e) => !e.faite) };
+  });
+
+  protected masquerPlan() {
+    this.planMasque.set(true);
+    try { localStorage.setItem('postulo.plan-masque', '1'); } catch { /* rien */ }
+  }
 
   protected salutation = computed(() => {
     const prenom = this.store.profil().prenom;

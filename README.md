@@ -12,8 +12,8 @@ L'idée de départ : comme beaucoup d'étudiants, je suivais mes candidatures da
 - **Import / export Excel** : import d'un fichier CSV exporté depuis Excel (les colonnes sont reconnues par leur nom), export au format Excel français.
 - **Simulation d'entretien** : un recruteur virtuel mène un entretien complet en 6 étapes (présentation, motivation, question métier, question STAR, question piège, « avez-vous des questions ? »). Il relance quand la réponse est vague, note chaque réponse sur 10 et termine par un bilan sur 5 critères. On peut répondre à l'oral (micro) et le recruteur peut lire ses questions à voix haute.
 - **Mon pitch** : prépare le discours de présentation pour 4 situations (« Présentez-vous », salon, appel à un recruteur, message LinkedIn), vérifie les points clés (preuve, chiffre, durée) et propose un entraînement à l'oral chronométré avec analyse du débit, des mots parasites et des idées oubliées.
-- **Lettre de motivation** générée à partir du profil et de l'offre, modifiable, exportable en PDF.
-- **CV** mis en page automatiquement à partir du profil, avec une accroche adaptée à chaque offre, exportable en PDF.
+- **CV et lettre de motivation** : 3 modèles assortis (Classique, Moderne, Épuré), 5 couleurs, 3 densités, aperçu A4 fidèle et export PDF d'une page. La lettre suit la mise en page française (expéditeur, destinataire, lieu et date, objet) et se modifie directement sur la page. Une liste de vérifications signale ce qui manque avant l'envoi (dépassement d'une page, nombre de mots, entreprise citée…).
+- **Confort** : plan de route en 5 étapes sur le tableau de bord, profil enregistré automatiquement, thème sombre, animations réduites si le système le demande.
 
 ## Stack technique
 
@@ -50,7 +50,7 @@ src/app/
     candidatures.ts
     entretien.ts
     pitch.ts
-    documents.ts        lettre de motivation + CV
+    documents/          page CV & lettres, modèles cv.ts et lettre.ts
     profil.ts
 ```
 
