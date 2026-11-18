@@ -1,7 +1,8 @@
 import { Component, computed, input } from '@angular/core';
 import { LigneParcours, Profil } from '../../core/models';
+import { puces } from '../../core/ats';
 
-export type ModeleDoc = 'classique' | 'moderne' | 'epure';
+export type ModeleDoc = 'ats' | 'classique' | 'moderne' | 'epure';
 export type Densite = 'compacte' | 'normale' | 'aeree';
 
 export const COULEURS = [
@@ -106,6 +107,53 @@ export const COULEURS = [
                 @if (p().interets) { <p><strong>Centres d'intérêt</strong> · {{ p().interets }}</p> }
               </div>
             </div>
+          }
+        }
+
+        <!-- ============ ATS : texte brut structuré, intitulés standards, aucune mise en forme piégeuse ============ -->
+        @case ('ats') {
+          <header>
+            <h1>{{ nom() }}</h1>
+            @if (titre()) { <p class="titre">{{ titre() }}</p> }
+            <p class="contact">
+              @if (p().email) { E-mail : {{ p().email }} }
+              @if (p().telephone) { | Téléphone : {{ p().telephone }} }
+              @if (p().ville) { | Ville : {{ p().ville }} }
+            </p>
+            @if (p().linkedin || p().github) {
+              <p class="contact">
+                @if (p().linkedin) { LinkedIn : {{ p().linkedin }} }
+                @if (p().github) { @if (p().linkedin) { | } Portfolio : {{ p().github }} }
+              </p>
+            }
+          </header>
+          @if (texteAccroche()) {
+            <section><h2>Profil</h2><p>{{ texteAccroche() }}</p></section>
+          }
+          @for (s of sectionsAts(); track s.titre) {
+            <section>
+              <h2>{{ s.titre }}</h2>
+              @for (l of s.lignes; track $index) {
+                <div class="ligne">
+                  <p><strong>{{ l.titre }}</strong>@if (l.lieu) { – {{ l.lieu }} }</p>
+                  @if (l.periode) { <p class="periode">{{ l.periode }}</p> }
+                  @if (l.description) {
+                    <ul class="puces">
+                      @for (d of decoupe(l.description); track $index) { <li>{{ d }}</li> }
+                    </ul>
+                  }
+                </div>
+              }
+            </section>
+          }
+          @if (competences().length) {
+            <section><h2>Compétences</h2><p>{{ competences().join(', ') }}</p></section>
+          }
+          @if (p().langues) {
+            <section><h2>Langues</h2><p>{{ p().langues }}</p></section>
+          }
+          @if (p().interets) {
+            <section><h2>Centres d'intérêt</h2><p>{{ p().interets }}</p></section>
           }
         }
 
@@ -227,6 +275,18 @@ export const COULEURS = [
     [data-modele='epure'] .tags { display: flex; flex-wrap: wrap; gap: 6px; }
     [data-modele='epure'] .tags span { border: 1px solid color-mix(in srgb, var(--c) 35%, white); color: var(--c); border-radius: 99px; padding: 1px 10px; font-size: 0.92em; }
     [data-modele='epure'] .rang p + p { margin-top: 4px; }
+
+    /* ---------- ATS : police standard, noir sur blanc, une seule colonne ---------- */
+    [data-modele='ats'] { padding: 54px 62px; font-family: Arial, Helvetica, sans-serif; color: #000; font-size: calc(var(--fs) + 0.5px); line-height: 1.45; hyphens: manual; }
+    [data-modele='ats'] h1 { font-size: 24px; font-weight: 700; }
+    [data-modele='ats'] .titre { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    [data-modele='ats'] .contact { margin-top: 3px; }
+    [data-modele='ats'] section { margin-top: calc(16px * var(--esp)); }
+    [data-modele='ats'] h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: calc(8px * var(--esp)); }
+    [data-modele='ats'] strong { color: #000; font-weight: 700; }
+    [data-modele='ats'] .periode { color: #000; font-style: italic; }
+    [data-modele='ats'] .puces { list-style: disc; padding-left: 18px; margin-top: 3px; }
+    [data-modele='ats'] .puces li { margin-bottom: 1px; }
   `,
 })
 export class CvApercu {
@@ -254,6 +314,13 @@ export class CvApercu {
       { ico: '‹›', v: net(p.github) },
     ].filter((x) => x.v);
   });
+
+  protected decoupe = puces;
+
+  /** Intitulés standards, ceux que les logiciels de tri reconnaissent. */
+  protected sectionsAts = computed(() =>
+    this.sections().map((s) => ({ ...s, titre: s.titre === 'Expériences' ? 'Expérience professionnelle' : s.titre })),
+  );
 
   protected sections = computed(() => {
     const p = this.p();

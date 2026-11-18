@@ -78,6 +78,14 @@ export interface Destinataire {
     [data-modele='epure'] .sous-titre { color: var(--c); letter-spacing: 0; text-transform: none; font-weight: 500; font-size: 12.5px; }
     [data-modele='epure'] .signature { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; }
 
+    [data-modele='ats'] { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #000; }
+    [data-modele='ats'] .nom { font-family: Arial, Helvetica, sans-serif; font-weight: 700; color: #000; font-size: 22px; }
+    [data-modele='ats'] .sous-titre { color: #000; letter-spacing: 0; text-transform: none; font-size: 13px; }
+    [data-modele='ats'] .coord { color: #000; font-size: 12px; }
+    [data-modele='ats'] .objet span { color: #000; }
+    [data-modele='ats'] .corps { text-align: left; hyphens: manual; }
+    [data-modele='ats'] .signature { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; }
+
     @media print { .corps:hover, .corps:focus { background: none; } }
   `,
 })

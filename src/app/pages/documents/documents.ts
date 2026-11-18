@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Store } from '../../core/store';
 import { Assistant, Cible } from '../../core/assistant';
 import { compterMots } from '../../core/oral';
+import { analyserAts, cvEnTexte } from '../../core/ats';
 import { COULEURS, CvApercu, Densite, ModeleDoc } from './cv';
 import { Destinataire, LettreApercu } from './lettre';
 
@@ -80,7 +81,7 @@ function ecrire(cle: string, v: unknown) {
               </select>
             </div>
           }
-          <div class="champ"><label for="poste">Poste</label><input id="poste" [(ngModel)]="cible.poste" placeholder="ex. Développeur web en alternance" /></div>
+          <div class="champ"><label for="poste">Poste</label><input id="poste" [(ngModel)]="cible.poste" (ngModelChange)="posteSignal.set($event)" placeholder="ex. Développeur web en alternance" /></div>
           <div class="champ"><label for="ent">Entreprise</label><input id="ent" [(ngModel)]="cible.entreprise" (ngModelChange)="majDestinataire()" /></div>
 
           @if (onglet() === 'lettre') {
@@ -132,6 +133,7 @@ function ecrire(cle: string, v: unknown) {
           </div>
           <p class="aide">{{ modeleActif().aide }}</p>
 
+          @if (reglages().modele !== 'ats') {
           <div class="champ">
             <label>Couleur</label>
             <div class="couleurs">
@@ -141,6 +143,7 @@ function ecrire(cle: string, v: unknown) {
               }
             </div>
           </div>
+          }
 
           @if (onglet() === 'cv') {
             <div class="champ">
@@ -154,9 +157,36 @@ function ecrire(cle: string, v: unknown) {
           }
         </section>
 
-        <!-- 3. vérifications -->
+        @if (onglet() === 'cv') {
+          <section class="carte bloc-reglage">
+            <h2><span class="num">3</span> Compatibilité ATS</h2>
+            <p class="aide">Colle l'annonce : on compare ses mots-clés à ton CV, comme le ferait le logiciel du recruteur.</p>
+            <textarea class="annonce" rows="4" [ngModel]="offre()" (ngModelChange)="offre.set($event)" placeholder="Colle ici le texte de l'offre d'emploi…"></textarea>
+            @if (ats(); as a) {
+              <div class="score-ats" [class.bon]="a.score >= 70" [class.moyen]="a.score >= 45 && a.score < 70">
+                <b>{{ a.score }} %</b>
+                <span>{{ a.score >= 70 ? 'Bonne correspondance' : a.score >= 45 ? 'Correspondance moyenne' : 'Il manque beaucoup de mots-clés' }}</span>
+              </div>
+              @if (a.manquants.length) {
+                <p class="aide" style="margin: 0">Absents de ton CV. Clique sur ceux que tu maîtrises vraiment pour les ajouter à tes compétences :</p>
+                <div class="mots">
+                  @for (m of a.manquants; track m) { <button class="mot manque" (click)="ajouterCompetence(m)" title="Ajouter à mes compétences">+ {{ m }}</button> }
+                </div>
+              }
+              @if (a.presents.length) {
+                <div class="mots">
+                  @for (m of a.presents; track m) { <span class="mot ok">✓ {{ m }}</span> }
+                </div>
+              }
+            }
+            <button class="btn btn-petit" (click)="copierTexte()">{{ copie() ? 'Copié ✓' : 'Copier le CV en texte brut' }}</button>
+            <p class="aide" style="margin: 0">Pratique pour les formulaires en ligne qui demandent de coller ton CV.</p>
+          </section>
+        }
+
+        <!-- 4. vérifications -->
         <section class="carte bloc-reglage">
-          <h2><span class="num">3</span> Avant d'envoyer</h2>
+          <h2><span class="num">{{ onglet() === 'cv' ? 4 : 3 }}</span> Avant d'envoyer</h2>
           <ul class="checklist">
             @for (v of verifications(); track v.label) {
               <li [class.ok]="v.ok">
@@ -213,11 +243,15 @@ function ecrire(cle: string, v: unknown) {
     .plus summary { cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--accent); margin-bottom: 8px; }
     .plus .champ { margin-bottom: 10px; }
 
-    .modeles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .modeles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .modele { border: 1px solid var(--bord); background: var(--surface); border-radius: 10px; padding: 8px 6px 7px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--encre-2); }
     .modele.actif { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); color: var(--encre); }
-    .vignette { width: 52px; height: 70px; background: #fff; border: 1px solid #ddd; border-radius: 3px; position: relative; overflow: hidden; display: block; }
+    .vignette { width: 46px; height: 62px; background: #fff; border: 1px solid #ddd; border-radius: 3px; position: relative; overflow: hidden; display: block; }
     .vignette i { position: absolute; display: block; background: #d8d8d8; border-radius: 1px; }
+    .vignette[data-v='ats'] i:nth-child(1) { left: 7px; width: 22px; top: 6px; height: 4px; background: #222; }
+    .vignette[data-v='ats'] i:nth-child(2) { left: 7px; right: 7px; top: 15px; height: 1px; background: #222; }
+    .vignette[data-v='ats'] i:nth-child(3) { left: 7px; right: 9px; top: 19px; height: 16px; background: repeating-linear-gradient(#cfcfcf 0 2px, transparent 2px 5px); }
+    .vignette[data-v='ats'] i:nth-child(4) { left: 7px; right: 7px; top: 40px; height: 16px; background: repeating-linear-gradient(#cfcfcf 0 2px, transparent 2px 5px); }
     .vignette[data-v='classique'] i:nth-child(1) { left: 8px; right: 8px; top: 7px; height: 5px; background: var(--c); }
     .vignette[data-v='classique'] i:nth-child(2) { left: 8px; right: 8px; top: 16px; height: 1px; background: var(--c); }
     .vignette[data-v='classique'] i:nth-child(3) { left: 8px; right: 14px; top: 22px; height: 18px; background: repeating-linear-gradient(#d8d8d8 0 2px, transparent 2px 5px); }
@@ -244,6 +278,19 @@ function ecrire(cle: string, v: unknown) {
     .checklist li.ok::before { border-color: var(--s-offre); background: var(--s-offre); box-shadow: inset 0 0 0 2.5px var(--surface); }
     .checklist small { display: block; color: var(--encre-3); font-size: 12.5px; }
 
+    .annonce { width: 100%; border: 1px solid var(--bord); background: var(--surface); border-radius: 9px; padding: 9px 11px; resize: vertical; outline: none; font-size: 13.5px; }
+    .annonce:focus { border-color: var(--accent); }
+    .score-ats { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--ko-fond); color: var(--ko-texte); }
+    .score-ats.moyen { background: var(--moyen-fond); color: var(--moyen-texte); }
+    .score-ats.bon { background: var(--ok-fond); color: var(--ok-texte); }
+    .score-ats b { font-family: var(--titre); font-size: 26px; }
+    .score-ats span { font-size: 13.5px; font-weight: 500; }
+    .mots { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mot { font-size: 12.5px; padding: 2px 9px; border-radius: 99px; border: 1px solid var(--bord); background: var(--surface-2); }
+    .mot.ok { color: var(--ok-texte); border-color: var(--ok-bord); background: var(--ok-fond); }
+    .mot.manque { cursor: pointer; color: var(--encre-2); border-style: dashed; }
+    .mot.manque:hover { border-color: var(--accent); color: var(--accent); }
+
     .apercu { min-width: 0; }
     .cadre { width: 210mm; margin: 0 auto; }
     .feuille { box-shadow: 0 2px 6px rgb(0 0 0 / 0.06), 0 18px 50px rgb(0 0 0 / 0.12); border-radius: 2px; overflow: hidden; }
@@ -253,7 +300,20 @@ function ecrire(cle: string, v: unknown) {
 
     @media print {
       .docs { display: block; }
-      .apercu { min-width: 0; }
+      .annonce { width: 100%; border: 1px solid var(--bord); background: var(--surface); border-radius: 9px; padding: 9px 11px; resize: vertical; outline: none; font-size: 13.5px; }
+    .annonce:focus { border-color: var(--accent); }
+    .score-ats { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--ko-fond); color: var(--ko-texte); }
+    .score-ats.moyen { background: var(--moyen-fond); color: var(--moyen-texte); }
+    .score-ats.bon { background: var(--ok-fond); color: var(--ok-texte); }
+    .score-ats b { font-family: var(--titre); font-size: 26px; }
+    .score-ats span { font-size: 13.5px; font-weight: 500; }
+    .mots { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mot { font-size: 12.5px; padding: 2px 9px; border-radius: 99px; border: 1px solid var(--bord); background: var(--surface-2); }
+    .mot.ok { color: var(--ok-texte); border-color: var(--ok-bord); background: var(--ok-fond); }
+    .mot.manque { cursor: pointer; color: var(--encre-2); border-style: dashed; }
+    .mot.manque:hover { border-color: var(--accent); color: var(--accent); }
+
+    .apercu { min-width: 0; }
       .cadre { zoom: 1 !important; width: 210mm; }
       .feuille { box-shadow: none; border-radius: 0; height: 297mm; overflow: hidden; }
     }
@@ -267,13 +327,14 @@ export class Documents implements OnDestroy {
 
   protected couleurs = COULEURS;
   protected modeles: { id: ModeleDoc; nom: string; aide: string }[] = [
-    { id: 'classique', nom: 'Classique', aide: 'Une colonne sobre, idéale pour les grandes entreprises : bien lue par les logiciels de tri de CV.' },
+    { id: 'ats', nom: 'ATS', aide: 'Format optimisé pour les logiciels de tri (ATS) : une colonne, police standard, intitulés classiques, pas de photo ni de couleur. Le plus sûr pour les grandes entreprises et les sites d\'emploi.' },
+    { id: 'classique', nom: 'Classique', aide: 'Une colonne sobre et élégante, avec une touche de couleur. Reste bien lu par les logiciels de tri.' },
     { id: 'moderne', nom: 'Moderne', aide: 'Colonne colorée avec photo, compétences et contact : parfait pour le numérique et les start-up.' },
     { id: 'epure', nom: 'Épuré', aide: 'Beaucoup d\'air et des intitulés en marge : élégant et très lisible.' },
   ];
 
   protected onglet = signal<Onglet>('cv');
-  protected reglages = signal<Reglages>(lire(CLE_REGLAGES, { modele: 'classique', couleur: COULEURS[0].valeur, densite: 'normale' }));
+  protected reglages = signal<Reglages>(lire(CLE_REGLAGES, { modele: 'ats', couleur: COULEURS[0].valeur, densite: 'normale' }));
   protected brouillon = signal<Brouillon>(lire(CLE_LETTRE, { objet: '', corps: '', destinataire: { entreprise: '', service: 'Service recrutement', adresse: '' } }));
   protected modeleActif = computed(() => this.modeles.find((m) => m.id === this.reglages().modele)!);
 
@@ -287,6 +348,12 @@ export class Documents implements OnDestroy {
   protected deborde = signal(false);
 
   protected mots = computed(() => compterMots(this.brouillon().corps));
+  protected copie = signal(false);
+  protected offre = signal('');
+  protected texteCv = computed(() => cvEnTexte(this.store.profil(), this.accroche(), this.posteSignal()));
+  protected ats = computed(() => (this.offre().trim().length > 40 ? analyserAts(this.offre(), this.texteCv()) : null));
+  // le poste est un champ de formulaire classique : on le recopie dans un signal pour les calculs
+  protected posteSignal = signal('');
 
   protected profilRempli = computed(() => {
     const p = this.store.profil();
@@ -305,6 +372,12 @@ export class Documents implements OnDestroy {
         { label: 'Au moins 5 compétences', ok: nbComp >= 5, aide: `Tu en as ${nbComp}. Reprends les mots-clés de l'offre.` },
         { label: 'E-mail et téléphone', ok: !!(p.email && p.telephone), aide: 'À compléter dans ton profil.' },
         { label: 'LinkedIn ou portfolio', ok: !!(p.linkedin || p.github), aide: 'Un lien vers tes projets fait la différence.' },
+        ...(this.ats() ? [{ label: 'Au moins 70 % des mots-clés de l\'offre', ok: this.ats()!.score >= 70, aide: 'Reprends les termes exacts de l\'annonce (si tu les maîtrises).' }] : []),
+        {
+          label: 'Format compatible ATS',
+          ok: this.reglages().modele === 'ats' || this.reglages().modele === 'classique',
+          aide: 'Les colonnes (Moderne, Épuré) sont parfois mal lues par les logiciels de tri : choisis ATS ou Classique pour les grandes entreprises.',
+        },
       ];
     }
     const b = this.brouillon();
@@ -364,6 +437,19 @@ export class Documents implements OnDestroy {
     }));
   }
 
+  protected ajouterCompetence(mot: string) {
+    const p = this.store.profil();
+    const liste = p.competences.split(',').map((x) => x.trim()).filter(Boolean);
+    const joli = /^[a-z]{2,4}$/.test(mot) ? mot.toUpperCase() : mot.charAt(0).toUpperCase() + mot.slice(1);
+    this.store.profil.set({ ...p, competences: [...liste, joli].join(', ') });
+  }
+
+  protected async copierTexte() {
+    await navigator.clipboard.writeText(this.texteCv());
+    this.copie.set(true);
+    setTimeout(() => this.copie.set(false), 1800);
+  }
+
   protected majDestinataire() {
     this.majBrouillon({ destinataire: { entreprise: this.cible.entreprise } });
   }
@@ -372,6 +458,7 @@ export class Documents implements OnDestroy {
     this.idCandidature.set(id);
     const c = this.store.trouver(id);
     this.cible = c ? { poste: c.poste, entreprise: c.entreprise, notes: '' } : { poste: '', entreprise: '', notes: '' };
+    this.posteSignal.set(this.cible.poste);
     this.accroche.set('');
     this.majDestinataire();
   }
