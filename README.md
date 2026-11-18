@@ -10,7 +10,8 @@ L'idée de départ : comme beaucoup d'étudiants, je suivais mes candidatures da
 - **Suivi des candidatures** : vue liste (recherche + filtres) et vue tableau type Kanban avec glisser-déposer pour changer le statut.
 - **Relances** : une candidature sans réponse depuis 7 jours remonte automatiquement dans « À relancer ».
 - **Import / export Excel** : import d'un fichier CSV exporté depuis Excel (les colonnes sont reconnues par leur nom), export au format Excel français.
-- **Simulation d'entretien** : un recruteur virtuel pose 5 questions adaptées au poste et à l'entreprise, commente chaque réponse puis donne un bilan et une note.
+- **Simulation d'entretien** : un recruteur virtuel mène un entretien complet en 6 étapes (présentation, motivation, question métier, question STAR, question piège, « avez-vous des questions ? »). Il relance quand la réponse est vague, note chaque réponse sur 10 et termine par un bilan sur 5 critères. On peut répondre à l'oral (micro) et le recruteur peut lire ses questions à voix haute.
+- **Mon pitch** : prépare le discours de présentation pour 4 situations (« Présentez-vous », salon, appel à un recruteur, message LinkedIn), vérifie les points clés (preuve, chiffre, durée) et propose un entraînement à l'oral chronométré avec analyse du débit, des mots parasites et des idées oubliées.
 - **Lettre de motivation** générée à partir du profil et de l'offre, modifiable, exportable en PDF.
 - **CV** mis en page automatiquement à partir du profil, avec une accroche adaptée à chaque offre, exportable en PDF.
 
@@ -27,7 +28,8 @@ Quelques choix que j'ai faits :
 
 - **Pas de compte, pas de base distante.** Les candidatures sont des données personnelles : elles restent dans le navigateur de l'étudiant. L'export CSV sert de sauvegarde. Le service `Store` centralise tout l'accès aux données, donc passer à une vraie base (Supabase, Firebase…) ne toucherait qu'un seul fichier.
 - **La clé API n'est jamais dans le front.** Le navigateur appelle `/api/assistant`, et c'est la fonction serverless qui parle à l'API Claude. Seul un résumé du profil est envoyé (pas d'e-mail ni de téléphone).
-- **Mode hors ligne.** Si l'IA n'est pas configurée ou ne répond pas, l'appli bascule sur une banque de questions et des modèles de lettre. Tout reste utilisable.
+- **Mode hors ligne.** Si l'IA n'est pas configurée ou ne répond pas, l'appli bascule sur un moteur à base de règles : questions adaptées au métier (développement, data, réseau, commerce, gestion), relances, analyse des réponses (exemples concrets, chiffres, structure STAR, mots parasites). Tout reste utilisable.
+- **Oral dans le navigateur.** La lecture des questions et la dictée utilisent l'API Web Speech (Chrome, Edge) : rien n'est envoyé à un serveur tiers par l'appli.
 
 ## Structure
 
@@ -40,12 +42,14 @@ src/app/
     store.ts            état de l'appli (signals) + persistance
     csv.ts              import / export Excel
     assistant.ts        appels à l'API + bascule hors ligne
-    hors-ligne.ts       questions et modèles sans IA
+    hors-ligne.ts       moteur d'entretien et modèles sans IA
+    oral.ts             synthèse vocale, dictée, analyse de l'oral
     exemples.ts         données de démo
   pages/
     tableau-de-bord.ts
     candidatures.ts
     entretien.ts
+    pitch.ts
     documents.ts        lettre de motivation + CV
     profil.ts
 ```
