@@ -5,7 +5,7 @@ export const routes: Routes = [
   { path: 'candidatures', title: 'Candidatures · Postulo', loadComponent: () => import('./pages/candidatures').then((m) => m.Candidatures) },
   { path: 'entretien', title: 'Simulation d\'entretien · Postulo', loadComponent: () => import('./pages/entretien').then((m) => m.Entretien) },
   { path: 'pitch', title: 'Mon pitch · Postulo', loadComponent: () => import('./pages/pitch').then((m) => m.PitchPage) },
-  { path: 'documents', title: 'CV & lettres · Postulo', loadComponent: () => import('./pages/documents').then((m) => m.Documents) },
+  { path: 'documents', title: 'CV & lettres · Postulo', loadComponent: () => import('./pages/documents/documents').then((m) => m.Documents) },
   { path: 'profil', title: 'Mon profil · Postulo', loadComponent: () => import('./pages/profil').then((m) => m.ProfilPage) },
   { path: '**', redirectTo: '' },
 ];

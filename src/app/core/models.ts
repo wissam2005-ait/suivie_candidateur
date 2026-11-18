@@ -39,6 +39,8 @@ export interface Profil {
   apropos: string;
   competences: string;
   langues: string;
+  interets: string;
+  photo: string; // data URL, optionnelle
   formations: LigneParcours[];
   experiences: LigneParcours[];
   projets: LigneParcours[];
@@ -82,6 +84,8 @@ export function profilVide(): Profil {
     apropos: '',
     competences: '',
     langues: '',
+    interets: '',
+    photo: '',
     formations: [],
     experiences: [],
     projets: [],
